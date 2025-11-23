@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+numpy
+pillow
+scikit-learn
+tensorflow
+tensorflow-intel
+joblib
+opencv-python
+aiofiles
+websockets
+gradio

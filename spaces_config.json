@@ -1,0 +1,11 @@
+{
+  "sdk": "docker",
+  "app_file": "Dockerfile",
+  "requirements_file": "requirements.txt",
+  "python_version": "3.11",
+  "system_packages": ["build-essential"],
+  "ports": [8000],
+  "env": {
+    "PORT": "8000"
+  }
+}
