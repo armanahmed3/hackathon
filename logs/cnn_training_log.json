@@ -1,0 +1,10 @@
+{
+  "model": "cnn",
+  "epochs": 20,
+  "batch_size": 32,
+  "num_classes": 2,
+  "final_train_accuracy": 0.5,
+  "final_val_accuracy": 0.5,
+  "final_train_loss": 0.7014799118041992,
+  "final_val_loss": 0.6896393299102783
+}

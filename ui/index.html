@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teachable Machine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="fade-in">Teachable Machine</h1>
+        
+        <!-- Navigation Tabs -->
+        <div class="tab-navigation fade-in">
+            <button class="tab-button active" data-tab="dataset">
+                <i class="fas fa-folder-open mr-2"></i>Dataset
+            </button>
+            <button class="tab-button" data-tab="training">
+                <i class="fas fa-brain mr-2"></i>Training
+            </button>
+            <button class="tab-button" data-tab="evaluation">
+                <i class="fas fa-chart-bar mr-2"></i>Evaluation
+            </button>
+            <button class="tab-button" data-tab="prediction">
+                <i class="fas fa-camera mr-2"></i>Prediction
+            </button>
+        </div>
+        
+        <!-- Dataset Tab -->
+        <div id="dataset-tab" class="tab-content">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Create Classes Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Create Classes</h2>
+                        <i class="fas fa-plus-circle text-primary"></i>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="class-name">
+                            <i class="fas fa-tag mr-2"></i>Class Name
+                        </label>
+                        <div class="flex">
+                            <input type="text" id="class-name" class="form-input rounded-r-none" placeholder="Enter class name">
+                            <button id="create-class-btn" class="btn btn-primary rounded-l-none">
+                                <i class="fas fa-plus mr-2"></i>Create
+                            </button>
+                        </div>
+                    </div>
+                    <div id="class-message" class="notification" style="display: none;"></div>
+                </div>
+                
+                <!-- Upload Images Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Upload Images</h2>
+                        <i class="fas fa-upload text-primary"></i>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="select-class">
+                            <i class="fas fa-folder mr-2"></i>Select Class
+                        </label>
+                        <select id="select-class" class="form-select">
+                            <option value="">Select a class</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="image-file">
+                            <i class="fas fa-images mr-2"></i>Choose Images (Multiple Selection)
+                        </label>
+                        <input type="file" id="image-file" class="form-input" accept="image/*" multiple>
+                    </div>
+                    <button id="upload-image-btn" class="btn btn-success">
+                        <i class="fas fa-cloud-upload-alt mr-2"></i>Upload Images
+                    </button>
+                    <div id="upload-message" class="notification" style="display: none;"></div>
+                </div>
+                
+                <!-- Webcam Capture Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Webcam Capture</h2>
+                        <i class="fas fa-camera text-primary"></i>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="webcam-class">
+                            <i class="fas fa-folder mr-2"></i>Select Class
+                        </label>
+                        <select id="webcam-class" class="form-select">
+                            <option value="">Select a class</option>
+                        </select>
+                    </div>
+                    <div class="webcam-container mb-4">
+                        <div id="webcam" class="webcam-feed"></div>
+                        <div id="capture-overlay" class="capture-overlay">📸</div>
+                    </div>
+                    <div class="btn-group">
+                        <button id="start-camera-btn" class="btn btn-primary">
+                            <i class="fas fa-video mr-2"></i>Start Camera
+                        </button>
+                        <button id="capture-btn" class="btn btn-error" disabled>
+                            <i class="fas fa-camera mr-2"></i>Capture
+                        </button>
+                    </div>
+                    <div id="webcam-message" class="notification" style="display: none;"></div>
+                </div>
+                
+                <!-- Dataset Preview Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Dataset Preview</h2>
+                        <i class="fas fa-list mr-2"></i>
+                    </div>
+                    <div id="dataset-preview" class="dataset-preview">
+                        <p class="text-gray-500 text-center py-8">No classes created yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Training Tab -->
+        <div id="training-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Model Selection Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Model Selection</h2>
+                        <i class="fas fa-cogs text-primary"></i>
+                    </div>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="logistic-checkbox" class="model-checkbox h-5 w-5 text-blue-600" value="logistic">
+                            <label for="logistic-checkbox" class="ml-2 text-gray-700 font-medium">
+                                <i class="fas fa-calculator mr-2"></i>Logistic Regression
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="rf-checkbox" class="model-checkbox h-5 w-5 text-blue-600" value="random_forest">
+                            <label for="rf-checkbox" class="ml-2 text-gray-700 font-medium">
+                                <i class="fas fa-tree mr-2"></i>Random Forest
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="cnn-checkbox" class="model-checkbox h-5 w-5 text-blue-600" value="cnn">
+                            <label for="cnn-checkbox" class="ml-2 text-gray-700 font-medium">
+                                <i class="fas fa-network-wired mr-2"></i>CNN
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <h3 class="text-lg font-medium mt-6 mb-3">
+                        <i class="fas fa-tags mr-2"></i>Classes to Train
+                    </h3>
+                    <div id="class-selection" class="space-y-2 mb-6">
+                        <p class="text-gray-500">No classes available. Create classes in the Dataset tab.</p>
+                    </div>
+                    
+                    <button id="start-training-btn" class="btn btn-primary w-full" disabled>
+                        <i class="fas fa-play-circle mr-2"></i>Start Training
+                    </button>
+                    <div id="training-message" class="notification" style="display: none;"></div>
+                </div>
+                
+                <!-- Training Progress Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Training Progress</h2>
+                        <i class="fas fa-tachometer-alt text-primary"></i>
+                    </div>
+                    <div id="training-status" class="mb-4">
+                        <p class="text-gray-500 text-center py-4">No training in progress.</p>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="progress-container">
+                        <div class="progress-label">
+                            <span class="font-medium">Progress</span>
+                            <span id="progress-percent" class="font-medium">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div>
+                            <h3 class="text-lg font-medium mb-2">
+                                <i class="fas fa-chart-line mr-2"></i>Loss
+                            </h3>
+                            <div class="chart-container">
+                                <canvas id="loss-chart"></canvas>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium mb-2">
+                                <i class="fas fa-percentage mr-2"></i>Accuracy
+                            </h3>
+                            <div class="chart-container">
+                                <canvas id="accuracy-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Evaluation Tab -->
+        <div id="evaluation-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 gap-6">
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Model Evaluation</h2>
+                        <i class="fas fa-clipboard-list text-primary"></i>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eval-model-select">
+                            <i class="fas fa-robot mr-2"></i>Select Model
+                        </label>
+                        <select id="eval-model-select" class="form-select">
+                            <option value="">Select a model</option>
+                            <option value="logistic">Logistic Regression</option>
+                            <option value="random_forest">Random Forest</option>
+                            <option value="cnn">CNN</option>
+                        </select>
+                    </div>
+                    <button id="evaluate-btn" class="btn btn-primary">
+                        <i class="fas fa-chart-bar mr-2"></i>Evaluate Model
+                    </button>
+                    <div id="evaluation-results" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Prediction Tab -->
+        <div id="prediction-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Prediction Input Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Make Prediction</h2>
+                        <i class="fas fa-bullseye text-primary"></i>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-image mr-2"></i>Upload Image or Use Webcam
+                        </label>
+                        <div class="btn-group mb-4">
+                            <button id="upload-predict-btn" class="btn btn-primary">
+                                <i class="fas fa-upload mr-2"></i>Upload Image
+                            </button>
+                            <button id="webcam-predict-btn" class="btn btn-secondary">
+                                <i class="fas fa-camera mr-2"></i>Use Webcam
+                            </button>
+                        </div>
+                        <input type="file" id="predict-image-file" class="form-input hidden" accept="image/*">
+                        <div id="prediction-webcam-container" class="hidden">
+                            <div id="prediction-webcam" class="webcam-feed mb-2"></div>
+                            <div class="btn-group">
+                                <button id="start-prediction-webcam-btn" class="btn btn-primary">
+                                    <i class="fas fa-video mr-2"></i>Start Camera
+                                </button>
+                                <button id="capture-prediction-btn" class="btn btn-error">
+                                    <i class="fas fa-camera mr-2"></i>Capture & Predict
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="prediction-preview" class="mb-4 text-center">
+                        <img id="preview-image" class="max-w-full max-h-64 mx-auto rounded-lg hidden" alt="Preview">
+                    </div>
+                    <button id="predict-btn" class="btn btn-success w-full" disabled>
+                        <i class="fas fa-magic mr-2"></i>Predict
+                    </button>
+                    <div id="prediction-message" class="notification" style="display: none;"></div>
+                </div>
+                
+                <!-- Prediction Results Panel -->
+                <div class="card fade-in">
+                    <div class="card-header">
+                        <h2 class="card-title">Prediction Results</h2>
+                        <i class="fas fa-poll text-primary"></i>
+                    </div>
+                    <div id="prediction-results" class="prediction-results">
+                        <p class="text-gray-500 text-center py-8">No predictions made yet.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

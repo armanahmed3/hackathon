@@ -1,0 +1,8 @@
+{
+  "model": "random_forest",
+  "train_accuracy": 1.0,
+  "test_accuracy": 0.25,
+  "n_estimators": 200,
+  "num_samples": 16,
+  "num_features": 150528
+}
